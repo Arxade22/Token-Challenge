@@ -1,0 +1,41 @@
+# Archivos generados por Node.js
+node_modules/
+
+# Archivos generados por TypeScript
+dist/
+
+# Archivos de configuración local
+.env
+
+# Archivos de registro
+logs/
+*.log
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas Visual Studio Code, podrías agregar:
+.vscode/
+
+# Directorio de dependencias generadas por Yarn (si lo usas)
+yarn-error.log
+.yarn-integrity
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas npm, podrías agregar:
+package-lock.json
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas Webpack, podrías agregar:
+dist/
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas Babel, podrías agregar:
+.babelrc
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas ESLint, podrías agregar:
+.eslintcache
+
+# Dependiendo de tu entorno de desarrollo, puedes agregar más exclusiones aquí.
+# Por ejemplo, si utilizas Prettier, podrías agregar:
+.prettierignore
+.prettierrc
