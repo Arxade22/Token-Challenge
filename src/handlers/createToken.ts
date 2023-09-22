@@ -1,18 +1,43 @@
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import * as AWS from 'aws-sdk';
 import * as crypto from 'crypto';
-import * as redis from 'redis';
 
-// Crea una instancia de cliente Redis
-const redisClient = redis.createClient({
-    host: 'localhost', // Cambia esto por la dirección de tu servidor Redis si es necesario
-    port: 6379, // Puerto predeterminado de Redis
-});
+// Crea una instancia de cliente de AWS S3
+const s3 = new AWS.S3();
 
-// Conexión a Redis
-redisClient.on('connect', () => {
-    console.log('Conectado a Redis');
-}); 
+// Función para generar un token seguro
+function generateToken(): string {
+    const token = crypto.randomBytes(16).toString('hex');
+    return token;
+}
+
+// Función para validar el número de tarjeta de crédito
+function isValidCardNumber(cardNumber: string): boolean {
+    // Eliminar espacios en blanco y guiones (si los hay)
+    const cleanedCardNumber = cardNumber.replace(/\s|-/g, '');
+
+    // Verificar si el número tiene entre 13 y 16 dígitos
+    if (!/^\d{13,16}$/.test(cleanedCardNumber)) {
+        return false;
+    }
+
+    // Algoritmo de Luhn (módulo 10)
+    let sum = 0;
+    let alternate = false;
+    for (let i = cleanedCardNumber.length - 1; i >= 0; i--) {
+        let digit = parseInt(cleanedCardNumber.charAt(i), 10);
+        if (alternate) {
+            digit *= 2;
+            if (digit > 9) {
+                digit -= 9;
+            }
+        }
+        sum += digit;
+        alternate = !alternate;
+    }
+
+    return sum % 10 === 0;
+}
 
 // Manejador para la creación de tokens
 export const createTokenHandler = async (
@@ -29,7 +54,7 @@ export const createTokenHandler = async (
             };
         }
 
-        // Validaciones de tarjeta, CVV, mes y año de vencimiento aquí 
+        // Validaciones de tarjeta, CVV, mes y año de vencimiento aquí
         if (!isValidCardNumber(card_number)) {
             return {
                 statusCode: 400,
@@ -63,8 +88,15 @@ export const createTokenHandler = async (
 
         const token = generateToken();
 
-        // Almacena los datos en Redis con una expiración de 15 minutos
-        redisClient.setex(token, 900, JSON.stringify(requestBody));
+        // Almacena los datos en S3 con una expiración de 15 minutos
+        await s3
+            .putObject({
+                Bucket: 'credit-card-tokens-s3',
+                Key: token,
+                Body: JSON.stringify(requestBody),
+                Expires: new Date(Date.now() + 900000), // 900 segundos (15 minutos)
+            })
+            .promise();
 
         return {
             statusCode: 200,
@@ -79,8 +111,3 @@ export const createTokenHandler = async (
     }
 };
 
-// Función para generar un token seguro
-function generateToken(): string {
-    const token = crypto.randomBytes(16).toString('hex');
-    return token;
-}

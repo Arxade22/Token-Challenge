@@ -1,0 +1,36 @@
+service: tokens-services 
+
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: us-east-1
+  environment:
+    PG_HOST: your-postgresql-host
+    PG_USER: your-postgresql-username
+    PG_PASSWORD: your-postgresql-password
+    PG_DATABASE: your-postgresql-database
+    S3_BUCKET: credit-card-tokens-s3
+
+functions:
+  createToken:
+    handler: src/handlers/createToken.createTokenHandler
+    events:
+      - http:
+          path: createToken
+          method: POST
+
+  getTokenData:
+    handler: src/handlers/getTokenData.getTokenDataHandler
+    events:
+      - http:
+          path: getTokenData
+          method: GET
+
+resources:
+  Resources:
+    MyS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: credit-card-tokens-s3
